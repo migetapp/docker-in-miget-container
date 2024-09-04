@@ -1,21 +1,22 @@
 # Docker in Miget Container
 
-Below example presents how to run Docker in ~~Docker~~ Miget (Kata) Container
+Below example presents how to run Docker in ~~Docker~~ Miget (Kata) Container.
+
 The following example demonstrates how to run Docker-in-~~Docker~~Miget (Kata) Container.
 
 > [!NOTE]  
-> Miget's PaaS uses Kata Containers with `virtfs` as a storage bridge between host system and a container runtime.
-> What that mean?
-> So... `virtfs` doesn't work well with the `overlayfs`, to workaround this, we are using sparse img file mounted as ext4 file system under `/var/lib/docker`. Please check `entrypoint.sh` file.
-> To have it working - mount a block device under `/data` with sufficient disk space available.
+> Miget's PaaS utilizes Kata Containers with `virtfs` as a storage bridge between the host system and the container runtime.
+> What does this mean?
+>  Since `virtfs` doesn't work well with `overlayfs`, a workaround is needed. We use a sparse image file mounted as an ext4 file system under `/var/lib/docker`. Please refer to the entrypoint.sh file for more details.
+> To ensure this setup works, mount a block device under `/data` with sufficient available disk space.
 
 ## Build
 
-Just create an App, assign this app to your Miget (compute resource) and `git push miget`. Voila.
+To build your app, simply create one, assign it to your Miget (compute resource), and push your changes using `git push miget`. That's it!
 
 ## Run
 
-Once you have it deployed onto Miget, enter into your App shell, and check:
+Once the app is deployed on Miget, you can enter your app's shell and check the Docker setup by running the following command:
 
 ```
 / # docker info
