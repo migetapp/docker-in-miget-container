@@ -1,13 +1,14 @@
 # Docker in Miget Container
 
-Below example presents how to run Docker in ~~Docker~~ Miget (Kata) Container.
-
 The following example demonstrates how to run Docker-in-~~Docker~~Miget (Kata) Container.
 
 > [!NOTE]  
 > Miget's PaaS utilizes Kata Containers with `virtfs` as a storage bridge between the host system and the container runtime.
-> What does this mean?
->  Since `virtfs` doesn't work well with `overlayfs`, a workaround is needed. We use a sparse image file mounted as an ext4 file system under `/var/lib/docker`. Please refer to the entrypoint.sh file for more details.
+>
+> **What does this mean?**
+>
+>  Since `virtfs` doesn't work well with `overlayfs`, a workaround is needed. We use a sparse image file mounted as an ext4 file system under `/var/lib/docker`. Please refer to the `entrypoint.sh` file for more details.
+>
 > To ensure this setup works, mount a block device under `/data` with sufficient available disk space.
 
 ## Build
