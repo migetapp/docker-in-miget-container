@@ -7,7 +7,6 @@ total_space_gb_int=$(printf "%.0f" "$total_space_gb")
 
 # create disk.img or resize disk.img
 if [ ! -f /data/disk.img ]; then
-  apk add e2fsprogs
   truncate -s "$((total_space_gb_int - 1))G" /data/disk.img
   mkfs.ext4 /data/disk.img
 else
@@ -16,7 +15,6 @@ else
   if [ "$desired_img_size" -gt "$current_size" ]; then
     echo "Resizing disk.img to ${desired_img_size}G"
     truncate -s "${desired_img_size}G" /data/disk.img
-    apk add e2fsprogs
     e2fsck -f /data/disk.img
     resize2fs /data/disk.img
   fi
