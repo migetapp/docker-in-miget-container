@@ -1,22 +1,36 @@
 #!/bin/sh
 
-# get the size of /data
-total_space=$(df --output=size /data | tail -n 1)
-total_space_gb=$(echo "($total_space / 1024 / 1024) + 0.5" | bc)
-total_space_gb_int=$(printf "%.0f" "$total_space_gb")
+total_space_kb=$(df -k /data | tail -n 1 | awk '{print $4}')
+total_space_mb=$((total_space_kb / 1024))
+total_space_gb=$(echo "scale=2; $total_space_mb / 1024" | bc)
 
-# create disk.img or resize disk.img
+image_size_gb=$(echo "$total_space_gb - 0.1" | bc)
+image_size_gb_int=$(printf "%.0f" "$image_size_gb")
+
+# Ensure image_size_gb_int is positive
+if [ "$image_size_gb_int" -le 0 ]; then
+  echo "Insufficient space to create or resize disk.img"
+  exit 1
+fi
+
+# Create disk.img if it doesn't exist
 if [ ! -f /data/disk.img ]; then
-  truncate -s "$((total_space_gb_int - 1))G" /data/disk.img
+  echo "Creating disk.img with size ${image_size_gb_int}G"
+  truncate -s "${image_size_gb_int}G" /data/disk.img
   mkfs.ext4 /data/disk.img
 else
-  current_size=$(du -BG --apparent-size /data/disk.img | cut -f1 | sed 's/G//')
-  desired_img_size=$((total_space_gb_int - 1))
-  if [ "$desired_img_size" -gt "$current_size" ]; then
-    echo "Resizing disk.img to ${desired_img_size}G"
-    truncate -s "${desired_img_size}G" /data/disk.img
-    e2fsck -f /data/disk.img
-    resize2fs /data/disk.img
+  # Check current size of disk.img in GB
+  current_img_size=$(stat -c%s /data/disk.img)
+  current_img_size_gb=$(echo "scale=2; $current_img_size / 1024 / 1024 / 1024" | bc | awk '{printf "%.0f\n", $1}')
+
+  # Resize disk.img only if necessary
+  if [ "$image_size_gb_int" -gt "$current_img_size_gb" ]; then
+    echo "Resizing disk.img to ${image_size_gb_int}G"
+    truncate -s "${image_size_gb_int}G" /data/disk.img
+    e2fsck -f /data/disk.img  # Check the filesystem
+    resize2fs /data/disk.img   # Resize the filesystem
+  else
+    echo "No resize needed. Current size: ${current_img_size_gb}G, Desired size: ${image_size_gb_int}G"
   fi
 fi
 
